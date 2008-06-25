@@ -32,7 +32,7 @@
  */
 
 class Html extends ContentPlugin {
-	var $version = '3.00b';
+	var $version = '3.00';
 	var $kernel = '2.10rc';
 	var $title = 'HTML';
 	var $description = 'HTML страница';
@@ -47,7 +47,7 @@ class Html extends ContentPlugin {
 		global $Eresus, $page;
 
 		$item = $Eresus->sections->get($page->id);
-		$item['content'] = $content;
+		$item['content'] = stripslashes($content);
 		$item['options']['allowGET'] = arg('allowGET', 'int');
 		$Eresus->sections->update($item);
 	}
@@ -83,13 +83,18 @@ class Html extends ContentPlugin {
 	//------------------------------------------------------------------------------
 	function clientRenderContent()
 	{
-		global $request, $page;
-		if ($page->topic) {
-			if (!(isset($page->options['allowGET']) && $page->options['allowGET'] && (strpos($page->topic, execScript.'?') === 0))) $page->httpError(404);
-		}
-		return parent::clientRenderContent();
+		global $Eresus, $page;
+
+		$extra_arguments = $Eresus->request['url'] != $Eresus->request['path'];
+		$is_GET_request = count($Eresus->request['arg']);
+		$GET_requests_alowed = isset($page->options['allowGET']) && $page->options['allowGET'];
+
+		if ($extra_arguments && !$is_GET_request) $page->httpError(404);
+		if ($is_GET_request && !$GET_requests_alowed) $page->httpError(404);
+
+		$result = parent::clientRenderContent();
+
+		return $result;
 	}
 	//------------------------------------------------------------------------------
 }
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-#
-?>
