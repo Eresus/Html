@@ -47,7 +47,7 @@ class Html extends ContentPlugin {
 		global $Eresus, $page;
 
 		$item = $Eresus->sections->get($page->id);
-		$item['content'] = stripslashes($content);
+		$item['content'] = arg('content');
 		$item['options']['allowGET'] = arg('allowGET', 'int');
 		$Eresus->sections->update($item);
 	}
