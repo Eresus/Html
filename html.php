@@ -37,11 +37,11 @@ class Html extends ContentPlugin {
 	var $title = 'HTML';
 	var $description = 'HTML страница';
 	var $type = 'client,content,ondemand';
- /**
-	* Обновление контента
-	*
-	* @param string $content  Новый контент
-	*/
+	/**
+	 * Обновление контента
+	 *
+	 * @param string $content  Новый контент
+	 */
 	function updateContent($content)
 	{
 		global $Eresus, $page;
@@ -52,11 +52,11 @@ class Html extends ContentPlugin {
 		$Eresus->sections->update($item);
 	}
 	//------------------------------------------------------------------------------
- /**
-	* Отрисовка административной части
-	*
-	* @return  string  Контент
-	*/
+	/**
+	 * Отрисовка административной части
+	 *
+	 * @return  string  Контент
+	 */
 	function adminRenderContent()
 	{
 		global $Eresus, $page;
