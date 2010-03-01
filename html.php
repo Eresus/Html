@@ -50,7 +50,7 @@ class Html extends ContentPlugin {
 
 		$item = $Eresus->sections->get($page->id);
 		$item['content'] = arg('content');
-		$item['options']['allowPOST'] = arg('allowPOST', 'int');
+		$item['options']['disallowPOST'] = arg('disallowPOST', 'int');
 		$Eresus->sections->update($item);
 	}
 	//------------------------------------------------------------------------------
@@ -74,7 +74,7 @@ class Html extends ContentPlugin {
 			array ('type'=>'hidden','name'=>'action', 'value' => 'update'),
 				array ('type' => 'html','name' => 'content','height' => '400px', 'value'=>$item['content']),
 				array ('type' => 'text', 'value' => 'Адрес страницы: <a href="'.$url.'">'.$url.'</a>'),
-				array ('type' => 'checkbox','name' => 'allowPOST', 'label' => 'Разрешить передавать аргументы методом POST', 'value'=>isset($item['options']['allowPOST'])?$item['options']['allowPOST']:false),
+				array ('type' => 'checkbox','name' => 'disallowPOST', 'label' => 'Запретить передавать аргументы методом POST', 'value'=>isset($item['options']['disallowPOST'])?$item['options']['disallowPOST']:false),
 		 ),
 		'buttons' => array('apply', 'reset'),
 		);
@@ -89,10 +89,10 @@ class Html extends ContentPlugin {
 
 		$extra_GET_arguments = $Eresus->request['url'] != $Eresus->request['path'];
 		$is_ARG_request = count($Eresus->request['arg']);
-		$POST_requests_alowed = isset($page->options['allowPOST']) && $page->options['allowPOST'];
+		$POST_requests_disallowed = isset($page->options['disallowPOST']) && $page->options['disallowPOST'];
 
 		if ($extra_GET_arguments) $page->httpError(404);
-		if ($is_ARG_request && !$POST_requests_alowed) $page->httpError(404);
+		if ($is_ARG_request && $POST_requests_disallowed) $page->httpError(404);
 
 		$result = parent::clientRenderContent();
 
