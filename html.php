@@ -1,12 +1,12 @@
 <?php
 /**
- * HTML-страница
+ * HTML
  *
- * Eresus 2
+ * Eresus 2.10
  *
  * Плагин обеспечивает визуальное редактирование текстографических страниц
  *
- * @version 3.00
+ * @version 3.01
  *
  * @copyright 	2005-2006, ProCreat Systems, http://procreat.ru/
  * @copyright   2007-2008, Eresus Group, http://eresus.ru/
@@ -29,13 +29,15 @@
  * Вы должны были получить копию Стандартной Общественной Лицензии
  * GNU с этой программой. Если Вы ее не получили, смотрите документ на
  * <http://www.gnu.org/licenses/>
+ *
+ * $Id: html.php 60 2010-03-01 03:41:02Z ghost $
  */
 
 class Html extends ContentPlugin {
-	var $version = '3.00';
-	var $kernel = '2.10rc';
+	var $version = '3.01';
+	var $kernel = '2.10';
 	var $title = 'HTML';
-	var $description = 'HTML страница';
+	var $description = 'Плагин обеспечивает визуальное редактирование текстографических страниц';
 	var $type = 'client,content,ondemand';
 	/**
 	 * Обновление контента
