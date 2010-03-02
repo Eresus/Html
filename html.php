@@ -8,11 +8,12 @@
  *
  * @version 3.01
  *
- * @copyright 	2005-2006, ProCreat Systems, http://procreat.ru/
- * @copyright   2007-2008, Eresus Group, http://eresus.ru/
- * @license     http://www.gnu.org/licenses/gpl.txt  GPL License 3
- * @maintainer  Mikhail Krasilnikov <mk@procreat.ru>
- * @author      Mikhail Krasilnikov <mk@procreat.ru>
+ * @copyright 2005, ProCreat Systems, http://procreat.ru/
+ * @copyright 2007, Eresus Group, http://eresus.ru/
+ * @copyright 2010, ООО "Два слона", http://dvaslona.ru/
+ * @license http://www.gnu.org/licenses/gpl.txt  GPL License 3
+ * @author Mikhail Krasilnikov <mk@procreat.ru>
+ * @author Ghost <ghost@dvaslona.ru>
  *
  * Данная программа является свободным программным обеспечением. Вы
  * вправе распространять ее и/или модифицировать в соответствии с
@@ -30,15 +31,24 @@
  * GNU с этой программой. Если Вы ее не получили, смотрите документ на
  * <http://www.gnu.org/licenses/>
  *
+ * @package HTML
+ *
  * $Id: html.php 60 2010-03-01 03:41:02Z ghost $
  */
 
-class Html extends ContentPlugin {
+/**
+ * Класс плагина
+ *
+ * @package HTML
+ */
+class Html extends ContentPlugin
+{
 	var $version = '3.01';
 	var $kernel = '2.10';
 	var $title = 'HTML';
 	var $description = 'Плагин обеспечивает визуальное редактирование текстографических страниц';
 	var $type = 'client,content,ondemand';
+
 	/**
 	 * Обновление контента
 	 *
@@ -54,6 +64,7 @@ class Html extends ContentPlugin {
 		$Eresus->sections->update($item);
 	}
 	//------------------------------------------------------------------------------
+
 	/**
 	 * Отрисовка административной части
 	 *
@@ -83,6 +94,11 @@ class Html extends ContentPlugin {
 		return $result;
 	}
 	//------------------------------------------------------------------------------
+
+	/**
+	 * ???
+	 * @return string
+	 */
 	function clientRenderContent()
 	{
 		global $Eresus, $page;
