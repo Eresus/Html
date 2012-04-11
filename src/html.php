@@ -84,51 +84,63 @@ class Html extends ContentPlugin
 	 * Обновление контента
 	 *
 	 * @param string $content  новый контент
+	 *
+	 * @return void;
 	 */
 	public function updateContent($content)
 	{
-		global $Eresus, $page;
-
-		$item = $Eresus->sections->get($page->id);
-		$item['content'] = arg('content');
+		$sections = $GLOBALS['Eresus'];
+		$item = $sections->get($GLOBALS['page']->id);
+		$item['content'] = $content;
 		$item['options']['disallowPOST'] = arg('disallowPOST', 'int');
-		$Eresus->sections->update($item);
+		$sections->update($item);
 	}
 	//------------------------------------------------------------------------------
 
 	/**
 	 * Отрисовка административной части
 	 *
-	 * @return  string  Контент
+	 * @return string  Контент
 	 */
 	public function adminRenderContent()
 	{
 		global $Eresus, $page;
 
-		if (arg('action') == 'update') $this->adminUpdate();
-		$item = $Eresus->sections->get($page->id);
-		$url = $page->clientURL($item['id']);
-		$form = array(
-		'name' => 'contentEditor',
-		'caption' => $page->title,
-		'width' => '100%',
-		'fields' => array (
-			array ('type'=>'hidden','name'=>'action', 'value' => 'update'),
-				array ('type' => 'html','name' => 'content','height' => '400px', 'value'=>$item['content']),
-				array ('type' => 'text', 'value' => 'Адрес страницы: <a href="'.$url.'">'.$url.'</a>'),
-				array ('type' => 'checkbox','name' => 'disallowPOST', 'label' => 'Запретить передавать аргументы методом POST', 'value'=>isset($item['options']['disallowPOST'])?$item['options']['disallowPOST']:false),
-		 ),
-		'buttons' => array('apply', 'reset'),
-		);
+		if (arg('action') == 'update')
+		{
+			$this->adminUpdate();
+		}
+		else
+		{
+			$item = $Eresus->sections->get($page->id);
+			$url = $page->clientURL($item['id']);
+			$form = array(
+				'name' => 'contentEditor',
+				'caption' => $page->title,
+				'width' => '100%',
+				'fields' => array (
+					array ('type' => 'hidden', 'name' => 'action', 'value' => 'update'),
+					array ('type' => 'html', 'name' => 'content', 'height' => '400px',
+						'value'=>$item['content']),
+					array ('type' => 'text', 'value' => 'Адрес страницы: <a href="'.$url.'">'.$url.'</a>'),
+					array ('type' => 'checkbox', 'name' => 'disallowPOST',
+						'label' => 'Запретить передавать аргументы методом POST',
+						'value' =>
+							isset($item['options']['disallowPOST']) ? $item['options']['disallowPOST'] : false),
+					),
+				'buttons' => array('apply', 'reset'),
+			);
 
-		$result = $page->renderForm($form, $item);
-		return $result;
+			$result = $page->renderForm($form, $item);
+			return $result;
+		}
 	}
 	//------------------------------------------------------------------------------
 
 	/**
-	 * ???
-	 * @return string
+	 * Возвращает контент раздела для КИ
+	 *
+	 * @return string  HTML
 	 */
 	public function clientRenderContent()
 	{
@@ -136,10 +148,13 @@ class Html extends ContentPlugin
 
 		$extra_GET_arguments = $Eresus->request['url'] != $Eresus->request['path'];
 		$is_ARG_request = count($Eresus->request['arg']);
-		$POST_requests_disallowed = isset($page->options['disallowPOST']) && $page->options['disallowPOST'];
+		$POST_requests_disallowed =
+			isset($page->options['disallowPOST']) && $page->options['disallowPOST'];
 
-		if ($extra_GET_arguments) $page->httpError(404);
-		if ($is_ARG_request && $POST_requests_disallowed) $page->httpError(404);
+		if ($extra_GET_arguments || ($is_ARG_request && $POST_requests_disallowed))
+		{
+			$page->httpError(404);
+		}
 
 		$result = parent::clientRenderContent();
 
