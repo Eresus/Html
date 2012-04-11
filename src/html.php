@@ -89,7 +89,7 @@ class Html extends ContentPlugin
 	 */
 	public function updateContent($content)
 	{
-		$sections = $GLOBALS['Eresus'];
+		$sections = $GLOBALS['Eresus']->sections;
 		$item = $sections->get($GLOBALS['page']->id);
 		$item['content'] = $content;
 		$item['options']['disallowPOST'] = arg('disallowPOST', 'int');
