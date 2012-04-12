@@ -54,7 +54,7 @@ class Html extends ContentPlugin
 	 *
 	 * @var string
 	 */
-	public $kernel = '2.10';
+	public $kernel = '3.00b';
 
 	/**
 	 * Название
