@@ -4,13 +4,13 @@
  *
  * Плагин обеспечивает визуальное редактирование текстографических страниц
  *
- * @version 4.00
+ * @version ${product.version}
  *
  * @copyright 2005, Михаил Красильников
  * @copyright 2007, Eresus Group, http://eresus.ru/
  * @copyright 2010, ООО "Два слона", http://dvaslona.ru/
  * @license http://www.gnu.org/licenses/gpl.txt  GPL License 3
- * @author Михаил Красильников <mihalych@vsepofigu.ru>
+ * @author Михаил Красильников <mk@dvaslona.ru>
  * @author Ghost <ghost@dvaslona.ru>
  *
  * Данная программа является свободным программным обеспечением. Вы
@@ -47,7 +47,7 @@ class Html extends ContentPlugin
 	 * @var string
 	 * @since 1.00
 	 */
-	public $version = '4.00a';
+	public $version = '${product.version}';
 
 	/**
 	 * Требуемая версия CMS
@@ -71,14 +71,6 @@ class Html extends ContentPlugin
 	 * @since 1.00
 	 */
 	public $description = 'Плагин обеспечивает визуальное редактирование текстографических страниц';
-
-	/**
-	 * Тип
-	 *
-	 * @var string
-	 * @since 1.00
-	 */
-	public $type = 'client,ondemand';
 
 	/**
 	 * Обновление контента
