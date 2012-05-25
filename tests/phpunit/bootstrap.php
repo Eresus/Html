@@ -96,9 +96,20 @@ class MockFacade
 	/**
 	 * Мок
 	 *
-	 * @var object
+	 * @var array
 	 */
-	private static $mock;
+	private static $mocks = array();
+
+	/**
+	 * Возвращает имя класса
+	 *
+	 * @return string
+	 */
+	public static function getName()
+	{
+		return __CLASS__;
+	}
+	//-----------------------------------------------------------------------------
 
 	/**
 	 * Устанавливает мок
@@ -109,7 +120,8 @@ class MockFacade
 	 */
 	public static function setMock($mock)
 	{
-		self::$mock = $mock;
+		$name = static::getName();
+		self::$mocks[$name] = $mock;
 	}
 	//-----------------------------------------------------------------------------
 
@@ -123,9 +135,10 @@ class MockFacade
 	 */
 	public static function __callstatic($method, $args)
 	{
-		if (self::$mock && method_exists(self::$mock, $method))
+		$name = static::getName();
+		if (isset(self::$mocks[$name]) && method_exists(self::$mocks[$name], $method))
 		{
-			return call_user_func_array(array(self::$mock, $method), $args);
+			return call_user_func_array(array(self::$mocks[$name], $method), $args);
 		}
 
 		return new UniversalStub();
@@ -150,26 +163,17 @@ class Plugin extends UniversalStub {}
  */
 class ContentPlugin extends Plugin {}
 
-/**
- * Заглушка для класса DB
- *
- * @package HTML
- * @subpackage Tests
- */
-class DB extends MockFacade {}
-
-/**
- * Заглушка для класса ezcQuery
- *
- * @package HTML
- * @subpackage Tests
- */
-class ezcQuery extends UniversalStub {}
-
-/**
- * Заглушка для класса ezcQuerySelect
- *
- * @package HTML
- * @subpackage Tests
- */
-class ezcQuerySelect extends ezcQuery {}
+class Eresus_CMS extends MockFacade
+{
+	public static function getName()
+	{
+		return __CLASS__;
+	}
+}
+class Eresus_Kernel extends MockFacade
+{
+	public static function getName()
+	{
+		return __CLASS__;
+	}
+}

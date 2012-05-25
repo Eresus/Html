@@ -41,10 +41,59 @@ require_once TESTS_SRC_DIR . '/html.php';
 class MyPlugin_Test extends PHPUnit_Framework_TestCase
 {
 	/**
+	 * @covers Html::isValidRequest
 	 */
-	public function test_stub()
+	public function test_isValidRequest()
 	{
+		$m_isValidRequest = new ReflectionMethod('Html', 'isValidRequest');
+		$m_isValidRequest->setAccessible(true);
 
+		$plugin = new Html;
+
+		$Eresus = new stdClass();
+		$Eresus_CMS = $this->getMock('stdClass', array('getLegacyKernel'));
+		$Eresus_CMS->expects($this->any())->method('getLegacyKernel')->
+			will($this->returnValue($Eresus));
+		Eresus_CMS::setMock($Eresus_CMS);
+
+		$Eresus->request = array(
+			'method' => 'GET',
+			'url' => 'http://example.org/',
+			'path' => 'http://example.org/',
+		);
+		$this->assertTrue($m_isValidRequest->invoke($plugin));
+
+		$Eresus->request = array(
+			'method' => 'GET',
+			'url' => 'http://example.org/file',
+			'path' => 'http://example.org/',
+		);
+		$this->assertFalse($m_isValidRequest->invoke($plugin));
+
+		$Eresus->request = array(
+			'method' => 'GET',
+			'url' => 'http://example.org/?foo=bar',
+			'path' => 'http://example.org/',
+		);
+		$this->assertFalse($m_isValidRequest->invoke($plugin));
+
+		$Eresus->request = array('method' => 'POST');
+
+		$page = new stdClass();
+		$app = $this->getMock('stdClass', array('getPage'));
+		$app->expects($this->any())->method('getPage')->will($this->returnValue($page));
+		$Eresus_Kernel = $this->getMock('stdClass', array('app'));
+		$Eresus_Kernel->expects($this->any())->method('app')->will($this->returnValue($app));
+		Eresus_Kernel::setMock($Eresus_Kernel);
+
+		$page->options = array();
+		$this->assertTrue($m_isValidRequest->invoke($plugin));
+
+		$page->options = array('disallowPOST' => false);
+		$this->assertTrue($m_isValidRequest->invoke($plugin));
+
+		$page->options = array('disallowPOST' => true);
+		$this->assertFalse($m_isValidRequest->invoke($plugin));
 	}
 	//-----------------------------------------------------------------------------
 }

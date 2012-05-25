@@ -132,14 +132,7 @@ class Html extends ContentPlugin
 	 */
 	public function clientRenderContent()
 	{
-		$request = Eresus_CMS::getLegacyKernel()->request;
-		$extra_GET_arguments = $request['url'] != $request['path'];
-		$is_ARG_request = count($request['arg']);
-		$POST_requests_disallowed =
-			isset(Eresus_Kernel::app()->getPage()->options['disallowPOST']) &&
-				Eresus_Kernel::app()->getPage()->options['disallowPOST'];
-
-		if ($extra_GET_arguments || ($is_ARG_request && $POST_requests_disallowed))
+		if (!$this->isValidRequest())
 		{
 			Eresus_Kernel::app()->getPage()->httpError(404);
 		}
@@ -147,6 +140,28 @@ class Html extends ContentPlugin
 		$result = parent::clientRenderContent();
 
 		return $result;
+	}
+	//------------------------------------------------------------------------------
+
+	/**
+	 * Возвращает true, если запрос допустим
+	 *
+	 * Проверяет запрос в соответствии с настройками раздела.
+	 *
+	 * @return bool
+	 */
+	private function isValidRequest()
+	{
+		$request = Eresus_CMS::getLegacyKernel()->request;
+		if ('POST' == $request['method'])
+		{
+			$options = Eresus_Kernel::app()->getPage()->options;
+			return !(isset($options['disallowPOST']) && $options['disallowPOST']);
+		}
+		else
+		{
+			return $request['url'] == $request['path'];
+		}
 	}
 	//------------------------------------------------------------------------------
 }
