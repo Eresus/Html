@@ -56,11 +56,19 @@ class MyPlugin_Test extends PHPUnit_Framework_TestCase
 			will($this->returnValue($Eresus));
 		Eresus_CMS::setMock($Eresus_CMS);
 
+		$page = new stdClass();
+		$app = $this->getMock('stdClass', array('getPage'));
+		$app->expects($this->any())->method('getPage')->will($this->returnValue($page));
+		$Eresus_Kernel = $this->getMock('stdClass', array('app'));
+		$Eresus_Kernel->expects($this->any())->method('app')->will($this->returnValue($app));
+		Eresus_Kernel::setMock($Eresus_Kernel);
+
 		$Eresus->request = array(
 			'method' => 'GET',
 			'url' => 'http://example.org/',
 			'path' => 'http://example.org/',
 		);
+		$page->options = array();
 		$this->assertTrue($m_isValidRequest->invoke($plugin));
 
 		$Eresus->request = array(
@@ -68,6 +76,13 @@ class MyPlugin_Test extends PHPUnit_Framework_TestCase
 			'url' => 'http://example.org/file',
 			'path' => 'http://example.org/',
 		);
+		$page->options = array();
+		$this->assertTrue($m_isValidRequest->invoke($plugin));
+
+		$page->options = array('disallowGET' => false);
+		$this->assertTrue($m_isValidRequest->invoke($plugin));
+
+		$page->options = array('disallowGET' => true);
 		$this->assertFalse($m_isValidRequest->invoke($plugin));
 
 		$Eresus->request = array(
@@ -75,16 +90,16 @@ class MyPlugin_Test extends PHPUnit_Framework_TestCase
 			'url' => 'http://example.org/?foo=bar',
 			'path' => 'http://example.org/',
 		);
+		$page->options = array();
+		$this->assertTrue($m_isValidRequest->invoke($plugin));
+
+		$page->options = array('disallowGET' => false);
+		$this->assertTrue($m_isValidRequest->invoke($plugin));
+
+		$page->options = array('disallowGET' => true);
 		$this->assertFalse($m_isValidRequest->invoke($plugin));
 
 		$Eresus->request = array('method' => 'POST');
-
-		$page = new stdClass();
-		$app = $this->getMock('stdClass', array('getPage'));
-		$app->expects($this->any())->method('getPage')->will($this->returnValue($page));
-		$Eresus_Kernel = $this->getMock('stdClass', array('app'));
-		$Eresus_Kernel->expects($this->any())->method('app')->will($this->returnValue($app));
-		Eresus_Kernel::setMock($Eresus_Kernel);
 
 		$page->options = array();
 		$this->assertTrue($m_isValidRequest->invoke($plugin));

@@ -84,7 +84,8 @@ class Html extends ContentPlugin
 		$sections = Eresus_CMS::getLegacyKernel()->sections;
 		$item = $sections->get(Eresus_Kernel::app()->getPage()->id);
 		$item['content'] = $content;
-		$item['options']['disallowPOST'] = arg('disallowPOST', 'int');
+		$item['options']['disallowGET'] = !arg('allowGET', 'int');
+		$item['options']['disallowPOST'] = !arg('allowPOST', 'int');
 		$sections->update($item);
 	}
 	//------------------------------------------------------------------------------
@@ -112,11 +113,15 @@ class Html extends ContentPlugin
 				array ('type' => 'html', 'name' => 'content', 'height' => '400px',
 					'value'=>$item['content']),
 				array ('type' => 'text', 'value' => 'Адрес страницы: <a href="'.$url.'">'.$url.'</a>'),
-				array ('type' => 'checkbox', 'name' => 'disallowPOST',
-					'label' => 'Запретить передавать аргументы методом POST',
+				array ('type' => 'checkbox', 'name' => 'allowGET',
+					'label' => 'Разрешить передавать аргументы методом GET',
 					'value' =>
-						isset($item['options']['disallowPOST']) ? $item['options']['disallowPOST'] : false),
-				),
+						isset($item['options']['disallowGET']) ? !$item['options']['disallowGET'] : true),
+				array ('type' => 'checkbox', 'name' => 'allowPOST',
+					'label' => 'Разрешить передавать аргументы методом POST',
+					'value' =>
+						isset($item['options']['disallowPOST']) ? !$item['options']['disallowPOST'] : true),
+			),
 			'buttons' => array('apply', 'reset'),
 		);
 
@@ -137,9 +142,9 @@ class Html extends ContentPlugin
 			Eresus_Kernel::app()->getPage()->httpError(404);
 		}
 
-		$result = parent::clientRenderContent();
+		$html = Eresus_Kernel::app()->getPage()->content;
 
-		return $result;
+		return $html;
 	}
 	//------------------------------------------------------------------------------
 
@@ -153,14 +158,18 @@ class Html extends ContentPlugin
 	private function isValidRequest()
 	{
 		$request = Eresus_CMS::getLegacyKernel()->request;
+		$options = Eresus_Kernel::app()->getPage()->options;
 		if ('POST' == $request['method'])
 		{
-			$options = Eresus_Kernel::app()->getPage()->options;
 			return !(isset($options['disallowPOST']) && $options['disallowPOST']);
 		}
 		else
 		{
-			return $request['url'] == $request['path'];
+			if ($request['url'] == $request['path'])
+			{
+				return true;
+			}
+			return !(isset($options['disallowGET']) && $options['disallowGET']);
 		}
 	}
 	//------------------------------------------------------------------------------
