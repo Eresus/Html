@@ -132,16 +132,16 @@ class Html extends ContentPlugin
 	 */
 	public function clientRenderContent()
 	{
-		global $Eresus, $page;
-
-		$extra_GET_arguments = $Eresus->request['url'] != $Eresus->request['path'];
-		$is_ARG_request = count($Eresus->request['arg']);
+		$request = Eresus_CMS::getLegacyKernel()->request;
+		$extra_GET_arguments = $request['url'] != $request['path'];
+		$is_ARG_request = count($request['arg']);
 		$POST_requests_disallowed =
-			isset($page->options['disallowPOST']) && $page->options['disallowPOST'];
+			isset(Eresus_Kernel::app()->getPage()->options['disallowPOST']) &&
+				Eresus_Kernel::app()->getPage()->options['disallowPOST'];
 
 		if ($extra_GET_arguments || ($is_ARG_request && $POST_requests_disallowed))
 		{
-			$page->httpError(404);
+			Eresus_Kernel::app()->getPage()->httpError(404);
 		}
 
 		$result = parent::clientRenderContent();
