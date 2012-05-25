@@ -81,8 +81,8 @@ class Html extends ContentPlugin
 	 */
 	public function updateContent($content)
 	{
-		$sections = $GLOBALS['Eresus']->sections;
-		$item = $sections->get($GLOBALS['page']->id);
+		$sections = Eresus_CMS::getLegacyKernel()->sections;
+		$item = $sections->get(Eresus_Kernel::app()->getPage()->id);
 		$item['content'] = $content;
 		$item['options']['disallowPOST'] = arg('disallowPOST', 'int');
 		$sections->update($item);
@@ -96,36 +96,32 @@ class Html extends ContentPlugin
 	 */
 	public function adminRenderContent()
 	{
-		global $Eresus, $page;
-
 		if (arg('action') == 'update')
 		{
 			$this->adminUpdate();
 		}
-		else
-		{
-			$item = $Eresus->sections->get($page->id);
-			$url = $page->clientURL($item['id']);
-			$form = array(
-				'name' => 'contentEditor',
-				'caption' => $page->title,
-				'width' => '100%',
-				'fields' => array (
-					array ('type' => 'hidden', 'name' => 'action', 'value' => 'update'),
-					array ('type' => 'html', 'name' => 'content', 'height' => '400px',
-						'value'=>$item['content']),
-					array ('type' => 'text', 'value' => 'Адрес страницы: <a href="'.$url.'">'.$url.'</a>'),
-					array ('type' => 'checkbox', 'name' => 'disallowPOST',
-						'label' => 'Запретить передавать аргументы методом POST',
-						'value' =>
-							isset($item['options']['disallowPOST']) ? $item['options']['disallowPOST'] : false),
-					),
-				'buttons' => array('apply', 'reset'),
-			);
 
-			$result = $page->renderForm($form, $item);
-			return $result;
-		}
+		$item = Eresus_CMS::getLegacyKernel()->sections->get(Eresus_Kernel::app()->getPage()->id);
+		$url = Eresus_Kernel::app()->getPage()->clientURL($item['id']);
+		$form = array(
+			'name' => 'contentEditor',
+			'caption' => Eresus_Kernel::app()->getPage()->title,
+			'width' => '100%',
+			'fields' => array (
+				array ('type' => 'hidden', 'name' => 'action', 'value' => 'update'),
+				array ('type' => 'html', 'name' => 'content', 'height' => '400px',
+					'value'=>$item['content']),
+				array ('type' => 'text', 'value' => 'Адрес страницы: <a href="'.$url.'">'.$url.'</a>'),
+				array ('type' => 'checkbox', 'name' => 'disallowPOST',
+					'label' => 'Запретить передавать аргументы методом POST',
+					'value' =>
+						isset($item['options']['disallowPOST']) ? $item['options']['disallowPOST'] : false),
+				),
+			'buttons' => array('apply', 'reset'),
+		);
+
+		$result = Eresus_Kernel::app()->getPage()->renderForm($form, $item);
+		return $result;
 	}
 	//------------------------------------------------------------------------------
 
