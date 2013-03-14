@@ -143,7 +143,7 @@
 	-->
 	<target name="docs" description="Generate documentation">
 
-		<delete dir="${docs.dir}" includeemptydirs="true" />
+		<delete dir="${docs.dir}" includeemptydirs="true" failonerror="false" />
 		<mkdir dir="${docs.dir}" />
 
 		<phpdoc2 title="HTML ${product.version} API"
