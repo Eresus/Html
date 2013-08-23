@@ -167,7 +167,11 @@ class Html extends ContentPlugin
 			{
 				return true;
 			}
-			return !(isset($options['disallowGET']) && $options['disallowGET']);
+			if (count($request['arg']))
+			{
+				return !(isset($options['disallowGET'])  && $options['disallowGET']);
+			}
+			return false;
 		}
 	}
 	//------------------------------------------------------------------------------
