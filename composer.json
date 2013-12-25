@@ -1,0 +1,12 @@
+{
+    "name": "eresus/html",
+    "description": "Модуль «Текстографические страницы» для Eresus CMS",
+    "license": "GPL-3.0",
+    "authors":
+    [
+        {
+            "name": "Михаил Красильников",
+            "email": "m.krasilnikov@yandex.ru"
+        }
+    ]
+}
