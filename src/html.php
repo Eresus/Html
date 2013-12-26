@@ -39,140 +39,145 @@
  */
 class Html extends ContentPlugin
 {
-	/**
-	 * Версия
-	 *
-	 * @var string
-	 * @since 1.00
-	 */
-	public $version = '${product.version}';
+    /**
+     * Версия
+     *
+     * @var string
+     * @since 1.00
+     */
+    public $version = '${product.version}';
 
-	/**
-	 * Требуемая версия CMS
-	 *
-	 * @var string
-	 */
-	public $kernel = '3.00b';
+    /**
+     * Требуемая версия CMS
+     *
+     * @var string
+     */
+    public $kernel = '3.00b';
 
-	/**
-	 * Название
-	 *
-	 * @var string
-	 * @since 1.00
-	 */
-	public $title = 'HTML';
+    /**
+     * Название
+     *
+     * @var string
+     * @since 1.00
+     */
+    public $title = 'HTML';
 
-	/**
-	 * Описание
-	 *
-	 * @var string
-	 * @since 1.00
-	 */
-	public $description = 'Плагин обеспечивает визуальное редактирование текстографических страниц';
+    /**
+     * Описание
+     *
+     * @var string
+     * @since 1.00
+     */
+    public $description = 'Плагин обеспечивает визуальное редактирование текстографических страниц';
 
-	/**
-	 * Обновление контента
-	 *
-	 * @param string $content  новый контент
-	 *
-	 * @return void;
-	 */
-	public function updateContent($content)
-	{
-		$sections = Eresus_CMS::getLegacyKernel()->sections;
-		$item = $sections->get(Eresus_Kernel::app()->getPage()->id);
-		$item['content'] = $content;
-		$item['options']['disallowGET'] = !arg('allowGET', 'int');
-		$item['options']['disallowPOST'] = !arg('allowPOST', 'int');
-		$sections->update($item);
-	}
-	//------------------------------------------------------------------------------
+    /**
+     * Обновление контента
+     *
+     * @param string $content  новый контент
+     *
+     * @return void;
+     */
+    public function updateContent($content)
+    {
+        $sections = Eresus_CMS::getLegacyKernel()->sections;
+        $item = $sections->get(Eresus_Kernel::app()->getPage()->id);
+        $item['content'] = $content;
+        $item['options']['disallowGET'] = !arg('allowGET', 'int');
+        $item['options']['disallowPOST'] = !arg('allowPOST', 'int');
+        $sections->update($item);
+    }
 
-	/**
-	 * Отрисовка административной части
-	 *
-	 * @return string  Контент
-	 */
-	public function adminRenderContent()
-	{
-		if (arg('action') == 'update')
-		{
-			$this->adminUpdate();
-		}
+    /**
+     * Отрисовка административной части
+     *
+     * @return string  Контент
+     */
+    public function adminRenderContent()
+    {
+        if (arg('action') == 'update')
+        {
+            $this->adminUpdate();
+        }
 
-		$item = Eresus_CMS::getLegacyKernel()->sections->get(Eresus_Kernel::app()->getPage()->id);
-		$url = Eresus_Kernel::app()->getPage()->clientURL($item['id']);
-		$form = array(
-			'name' => 'contentEditor',
-			'caption' => Eresus_Kernel::app()->getPage()->title,
-			'width' => '100%',
-			'fields' => array (
-				array ('type' => 'hidden', 'name' => 'action', 'value' => 'update'),
-				array ('type' => 'html', 'name' => 'content', 'height' => '400px',
-					'value'=>$item['content']),
-				array ('type' => 'text', 'value' => 'Адрес страницы: <a href="'.$url.'">'.$url.'</a>'),
-				array ('type' => 'checkbox', 'name' => 'allowGET',
-					'label' => 'Разрешить передавать аргументы методом GET',
-					'value' =>
-						isset($item['options']['disallowGET']) ? !$item['options']['disallowGET'] : true),
-				array ('type' => 'checkbox', 'name' => 'allowPOST',
-					'label' => 'Разрешить передавать аргументы методом POST',
-					'value' =>
-						isset($item['options']['disallowPOST']) ? !$item['options']['disallowPOST'] : true),
-			),
-			'buttons' => array('apply', 'reset'),
-		);
+        $item = Eresus_CMS::getLegacyKernel()->sections->get(Eresus_Kernel::app()->getPage()->id);
+        $url = Eresus_Kernel::app()->getPage()->clientURL($item['id']);
+        $form = array(
+            'name' => 'contentEditor',
+            'caption' => Eresus_Kernel::app()->getPage()->title,
+            'width' => '100%',
+            'fields' => array(
+                array('type' => 'hidden', 'name' => 'action', 'value' => 'update'),
+                array('type' => 'html', 'name' => 'content', 'height' => '400px',
+                    'value' => $item['content']),
+                array('type' => 'text', 'value' => 'Адрес страницы: <a href="' . $url . '">' . $url
+                    . '</a>'),
+                array('type' => 'checkbox', 'name' => 'allowGET',
+                    'label' => 'Разрешить передавать аргументы методом GET',
+                    'value' =>
+                    isset($item['options']['disallowGET']) ? !$item['options']['disallowGET']
+                        : true),
+                array('type' => 'checkbox', 'name' => 'allowPOST',
+                    'label' => 'Разрешить передавать аргументы методом POST',
+                    'value' =>
+                    isset($item['options']['disallowPOST']) ? !$item['options']['disallowPOST']
+                        : true),
+            ),
+            'buttons' => array('apply', 'reset'),
+        );
 
-		$result = Eresus_Kernel::app()->getPage()->renderForm($form, $item);
-		return $result;
-	}
-	//------------------------------------------------------------------------------
+        /** @var TAdminUI $page */
+        $page = Eresus_Kernel::app()->getPage();
+        $result = $page->renderForm($form, $item);
+        return $result;
+    }
 
-	/**
-	 * Возвращает контент раздела для КИ
-	 *
-	 * @return string  HTML
-	 */
-	public function clientRenderContent()
-	{
-		if (!$this->isValidRequest())
-		{
-			Eresus_Kernel::app()->getPage()->httpError(404);
-		}
+    /**
+     * Возвращает контент раздела для КИ
+     *
+     * @return string  HTML
+     */
+    public function clientRenderContent()
+    {
+        /** @var TClientUI $page */
+        $page = Eresus_Kernel::app()->getPage();
 
-		$html = Eresus_Kernel::app()->getPage()->content;
+        if (!$this->isValidRequest())
+        {
+            $page->httpError(404);
+        }
 
-		return $html;
-	}
-	//------------------------------------------------------------------------------
+        $html = $page->content;
 
-	/**
-	 * Возвращает true, если запрос допустим
-	 *
-	 * Проверяет запрос в соответствии с настройками раздела.
-	 *
-	 * @return bool
-	 */
-	private function isValidRequest()
-	{
-		$request = Eresus_CMS::getLegacyKernel()->request;
-		$options = Eresus_Kernel::app()->getPage()->options;
-		if ('POST' == $request['method'])
-		{
-			return !(isset($options['disallowPOST']) && $options['disallowPOST']);
-		}
-		else
-		{
-			if ($request['url'] == $request['path'])
-			{
-				return true;
-			}
-			if (isset($request['arg']) && count($request['arg']))
-			{
-				return !(isset($options['disallowGET'])  && $options['disallowGET']);
-			}
-			return false;
-		}
-	}
-	//------------------------------------------------------------------------------
+        return $html;
+    }
+
+    /**
+     * Возвращает true, если запрос допустим
+     *
+     * Проверяет запрос в соответствии с настройками раздела.
+     *
+     * @return bool
+     */
+    private function isValidRequest()
+    {
+        $request = Eresus_CMS::getLegacyKernel()->request;
+        $options = Eresus_Kernel::app()->getPage()->options;
+        if ('POST' == $request['method'])
+        {
+            return !(isset($options['disallowPOST']) && $options['disallowPOST']);
+        }
+        else
+        {
+            if ($request['url'] == $request['path'])
+            {
+                return true;
+            }
+            if (isset($request['arg']) && count($request['arg']))
+            {
+                return !(isset($options['disallowGET']) && $options['disallowGET']);
+            }
+            return false;
+        }
+    }
 }
+
