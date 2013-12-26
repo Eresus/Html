@@ -162,22 +162,19 @@ class Html extends ContentPlugin
     {
         $request = Eresus_CMS::getLegacyKernel()->request;
         $options = Eresus_Kernel::app()->getPage()->options;
-        if ('POST' == $request['method'])
+        $disallowPOST = array_key_exists('disallowPOST', $options) && $options['disallowPOST'];
+        if ('POST' == $request['method'] && $disallowPOST)
         {
-            return !(isset($options['disallowPOST']) && $options['disallowPOST']);
-        }
-        else
-        {
-            if ($request['url'] == $request['path'])
-            {
-                return true;
-            }
-            if (isset($request['arg']) && count($request['arg']))
-            {
-                return !(isset($options['disallowGET']) && $options['disallowGET']);
-            }
             return false;
         }
+
+        $disallowGET = array_key_exists('disallowGET', $options) && $options['disallowGET'];
+        $hasGetArgs = $request['url'] != $request['path'];
+        if ($hasGetArgs && $disallowGET)
+        {
+            return false;
+        }
+        return true;
     }
 }
 

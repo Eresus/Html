@@ -5,7 +5,7 @@
  * @version ${product.version}
  *
  * @copyright 2012, ООО «Два слона», http://dvaslona.ru/
- * @license http://www.gnu.org/licenses/gpl.txt	GPL License 3
+ * @license http://www.gnu.org/licenses/gpl.txt    GPL License 3
  * @author Михаил Красильников <mk@dvaslona.ru>
  *
  * Данная программа является свободным программным обеспечением. Вы
@@ -40,75 +40,99 @@ require_once TESTS_SRC_DIR . '/html.php';
  */
 class MyPlugin_Test extends PHPUnit_Framework_TestCase
 {
-	/**
-	 * @covers Html::isValidRequest
-	 */
-	public function test_isValidRequest()
-	{
-		$m_isValidRequest = new ReflectionMethod('Html', 'isValidRequest');
-		$m_isValidRequest->setAccessible(true);
+    /**
+     * @dataProvider isValidRequestProvider
+     * @covers Html::isValidRequest
+     */
+    public function testIsValidRequest($request, $options, $isValid, $message)
+    {
+        $isValidRequest = new ReflectionMethod('Html', 'isValidRequest');
+        $isValidRequest->setAccessible(true);
 
-		$plugin = new Html;
+        $plugin = new Html;
 
-		$Eresus = new stdClass();
-		$Eresus_CMS = $this->getMock('stdClass', array('getLegacyKernel'));
-		$Eresus_CMS->expects($this->any())->method('getLegacyKernel')->
-			will($this->returnValue($Eresus));
-		Eresus_CMS::setMock($Eresus_CMS);
+        $Eresus = new stdClass();
+        $Eresus_CMS = $this->getMock('stdClass', array('getLegacyKernel'));
+        $Eresus_CMS->expects($this->any())->method('getLegacyKernel')->
+            will($this->returnValue($Eresus));
+        Eresus_CMS::setMock($Eresus_CMS);
 
-		$page = new stdClass();
-		$app = $this->getMock('stdClass', array('getPage'));
-		$app->expects($this->any())->method('getPage')->will($this->returnValue($page));
-		$Eresus_Kernel = $this->getMock('stdClass', array('app'));
-		$Eresus_Kernel->expects($this->any())->method('app')->will($this->returnValue($app));
-		Eresus_Kernel::setMock($Eresus_Kernel);
+        $page = new stdClass();
+        $app = $this->getMock('stdClass', array('getPage'));
+        $app->expects($this->any())->method('getPage')->will($this->returnValue($page));
+        $Eresus_Kernel = $this->getMock('stdClass', array('app'));
+        $Eresus_Kernel->expects($this->any())->method('app')->will($this->returnValue($app));
+        Eresus_Kernel::setMock($Eresus_Kernel);
 
-		$Eresus->request = array(
-			'method' => 'GET',
-			'url' => 'http://example.org/',
-			'path' => 'http://example.org/',
-		);
-		$page->options = array();
-		$this->assertTrue($m_isValidRequest->invoke($plugin));
+        $Eresus->request = $request;
+        $page->options = $options;
+        $this->assertEquals($isValid, $isValidRequest->invoke($plugin), $message);
+    }
 
-		$Eresus->request = array(
-			'method' => 'GET',
-			'url' => 'http://example.org/file',
-			'path' => 'http://example.org/',
-		);
-		$page->options = array();
-		$this->assertTrue($m_isValidRequest->invoke($plugin));
+    /**
+     * @return array
+     */
+    public function isValidRequestProvider()
+    {
+        $requestEmpty = array(
+            'method' => 'GET',
+            'url' => 'http://example.org/',
+            'path' => 'http://example.org/',
+        );
 
-		$page->options = array('disallowGET' => false);
-		$this->assertTrue($m_isValidRequest->invoke($plugin));
+        $requestWithFile = array(
+            'method' => 'GET',
+            'url' => 'http://example.org/file',
+            'path' => 'http://example.org/',
+        );
 
-		$page->options = array('disallowGET' => true);
-		$this->assertFalse($m_isValidRequest->invoke($plugin));
+        $requestWithGetArgs = array(
+            'method' => 'GET',
+            'url' => 'http://example.org/?foo=bar',
+            'path' => 'http://example.org/',
+        );
 
-		$Eresus->request = array(
-			'method' => 'GET',
-			'url' => 'http://example.org/?foo=bar',
-			'path' => 'http://example.org/',
-		);
-		$page->options = array();
-		$this->assertTrue($m_isValidRequest->invoke($plugin));
+        $requestWithFileAndGetArgs = array(
+            'method' => 'GET',
+            'url' => 'http://example.org/file?foo=bar',
+            'path' => 'http://example.org/',
+        );
 
-		$page->options = array('disallowGET' => false);
-		$this->assertTrue($m_isValidRequest->invoke($plugin));
+        $requestPostEmpty = array(
+            'method' => 'POST',
+            'url' => 'http://example.org/',
+            'path' => 'http://example.org/',
+        );
 
-		$page->options = array('disallowGET' => true);
-		$this->assertFalse($m_isValidRequest->invoke($plugin));
+        $optionsNone = array();
+        $optionsAllowGet = array('disallowGET' => false);
+        $optionsDisallowGet = array('disallowGET' => true);
+        $optionsAllowPost = array('disallowPOST' => false);
+        $optionsDisallowPost = array('disallowPOST' => true);
 
-		$Eresus->request = array('method' => 'POST');
+        return array(
+            array($requestEmpty, $optionsNone, true, 'без параметров и опций'),
 
-		$page->options = array();
-		$this->assertTrue($m_isValidRequest->invoke($plugin));
+            array($requestWithGetArgs, $optionsNone, true, 'аргументы GET без опций'),
+            array($requestWithGetArgs, $optionsAllowGet, true, 'аргументы GET с разрешнием GET'),
+            array($requestWithGetArgs, $optionsDisallowGet, false,
+                'аргументы GET без разрешения GET'),
 
-		$page->options = array('disallowPOST' => false);
-		$this->assertTrue($m_isValidRequest->invoke($plugin));
+            array($requestWithFile, $optionsNone, true, 'файл без опций'),
+            array($requestWithFile, $optionsAllowGet, true, 'файл с разрешнием GET'),
+            array($requestWithFile, $optionsDisallowGet, false, 'файл без разрешения GET'),
 
-		$page->options = array('disallowPOST' => true);
-		$this->assertFalse($m_isValidRequest->invoke($plugin));
-	}
-	//-----------------------------------------------------------------------------
+            array($requestWithFileAndGetArgs, $optionsNone, true,
+                'файл и аргументы GET без опций'),
+            array($requestWithFileAndGetArgs, $optionsAllowGet, true,
+                'файл и аргументы GET с разрешнием GET'),
+            array($requestWithFileAndGetArgs, $optionsDisallowGet, false,
+                'файл и аргументы GET без разрешения GET'),
+
+            array($requestPostEmpty, $optionsNone, true, 'POST без опций'),
+            array($requestPostEmpty, $optionsAllowPost, true, 'POST с разрешением POST'),
+            array($requestPostEmpty, $optionsDisallowPost, false, 'POST без разрешения POST'),
+        );
+    }
 }
+
