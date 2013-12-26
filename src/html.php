@@ -161,7 +161,9 @@ class Html extends ContentPlugin
     private function isValidRequest()
     {
         $request = Eresus_CMS::getLegacyKernel()->request;
-        $options = Eresus_Kernel::app()->getPage()->options;
+        /** @var TClientUI $page */
+        $page = Eresus_Kernel::app()->getPage();
+        $options = $page->options;
         $disallowPOST = array_key_exists('disallowPOST', $options) && $options['disallowPOST'];
         if ('POST' == $request['method'] && $disallowPOST)
         {
