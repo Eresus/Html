@@ -81,10 +81,12 @@ class Html extends ContentPlugin
     {
         $sections = Eresus_CMS::getLegacyKernel()->sections;
         $item = $sections->get(Eresus_Kernel::app()->getPage()->id);
-        $item['content'] = $content;
-        $item['options']['disallowGET'] = !arg('allowGET', 'int');
-        $item['options']['disallowPOST'] = !arg('allowPOST', 'int');
-        $sections->update($item);
+        $section = new Html_SiteSection($item);
+        $section->setContent($content);
+        $section->setOption('disallowGET', !arg('allowGET', 'int'));
+        $section->setOption('disallowPOST', !arg('allowPOST', 'int'));
+        $section->setOption('html.rel_canonical', arg('canonical', 'int'));
+        $sections->update($section->toArray());
     }
 
     /**
@@ -100,7 +102,7 @@ class Html extends ContentPlugin
         }
 
         $item = Eresus_CMS::getLegacyKernel()->sections->get(Eresus_Kernel::app()->getPage()->id);
-        $url = Eresus_Kernel::app()->getPage()->clientURL($item['id']);
+        $section = new Html_SiteSection($item);
         $form = array(
             'name' => 'contentEditor',
             'caption' => Eresus_Kernel::app()->getPage()->title,
@@ -108,20 +110,19 @@ class Html extends ContentPlugin
             'fields' => array(
                 array('type' => 'hidden', 'name' => 'action', 'value' => 'update'),
                 array('type' => 'html', 'name' => 'content', 'height' => '400px',
-                    'value' => $item['content']),
-                array('type' => 'text', 'value' => 'Адрес страницы: <a href="' . $url . '">' . $url
-                    . '</a>'),
+                    'value' => $section->getContent()),
+                array('type' => 'text', 'value' => 'Адрес страницы: <a href="'
+                    . $section->getClientUrl() . '">' . $section->getClientUrl() . '</a>'),
                 array('type' => 'checkbox', 'name' => 'allowGET',
                     'label' => 'Разрешить передавать аргументы методом GET',
-                    'value' =>
-                    isset($item['options']['disallowGET']) ? !$item['options']['disallowGET']
-                        : true),
+                    'value' => !$section->getOption('disallowGET', true)),
                 array('type' => 'checkbox', 'name' => 'allowPOST',
                     'label' => 'Разрешить передавать аргументы методом POST',
-                    'value' =>
-                    isset($item['options']['disallowPOST']) ? !$item['options']['disallowPOST']
-                        : true),
-            ),
+                    'value' => !$section->getOption('disallowPOST', true)),
+                array('type' => 'checkbox', 'name' => 'canonical',
+                    'label' => 'Добвлять к странице мета-тег «rel="canonical"»',
+                    'value' => $section->getOption('html.rel_canonical', true)),
+                ),
             'buttons' => array('apply', 'reset'),
         );
 
@@ -140,10 +141,24 @@ class Html extends ContentPlugin
     {
         /** @var TClientUI $page */
         $page = Eresus_Kernel::app()->getPage();
+        $section = Html_SiteSection::createFromWebPage($page);
 
         if (!$this->isValidRequest())
         {
             $page->httpError(404);
+        }
+
+        if ($section->getOption('html.rel_canonical', true))
+        {
+            /*
+             * TODO После выполнения https://github.com/Eresus/EresusCMS/issues/39
+             * можно будет переделать
+             */
+            $headProperty = new ReflectionProperty('WebPage', 'head');
+            $headProperty->setAccessible(true);
+            $head = $headProperty->getValue($page);
+            $head['content'] .= '<link rel="canonical" href="' . $section->getClientUrl() . '">';
+            $headProperty->setValue($page, $head);
         }
 
         $html = $page->content;
