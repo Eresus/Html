@@ -44,13 +44,13 @@ class Html_SiteSection
     /**
      * Создаёт модель разедла из объекта WebPage
      *
-     * @param WebServer $page
+     * @param WebPage $page
      *
      * @return Html_SiteSection
      *
      * @since 4.01
      */
-    public static function createFromWebPage(WebServer $page)
+    public static function createFromWebPage(WebPage $page)
     {
         $raw = array();
         if ($page instanceof TClientUI)
