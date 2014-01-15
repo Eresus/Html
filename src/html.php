@@ -45,7 +45,7 @@ class Html extends ContentPlugin
      * @var string
      * @since 1.00
      */
-    public $version = '${product.version}';
+    public $version = 'x.xx';
 
     /**
      * Требуемая версия CMS
@@ -71,6 +71,38 @@ class Html extends ContentPlugin
     public $description = 'Плагин обеспечивает визуальное редактирование текстографических страниц';
 
     /**
+     * Настройки
+     *
+     * @var array
+     *
+     * @since x.xx
+     */
+    public $settings = array(
+        // Заметки
+        'notes' => false
+    );
+
+    /**
+     * Действия при установке модуля
+     */
+    public function install()
+    {
+        parent::install();
+        $driver = ORM::getManager()->getDriver();
+        $driver->createTable(ORM::getTable($this, 'Page'));
+    }
+
+    /**
+     * Действия при удалении модуля
+     */
+    public function uninstall()
+    {
+        $driver = ORM::getManager()->getDriver();
+        $driver->dropTable(ORM::getTable($this, 'Page'));
+        parent::uninstall();
+    }
+
+    /**
      * Обновление контента
      *
      * @param string $content  новый контент
@@ -86,6 +118,16 @@ class Html extends ContentPlugin
         $section->setOption('disallowGET', !arg('allowGET', 'int'));
         $section->setOption('disallowPOST', !arg('allowPOST', 'int'));
         $section->setOption('html.rel_canonical', arg('canonical', 'int'));
+
+        if ($this->settings['notes'])
+        {
+            $notes = arg('notes');
+            if (!is_null($notes))
+            {
+                $section->setNotes($notes);
+            }
+        }
+
         $sections->update($section->toArray());
     }
 
@@ -107,27 +149,58 @@ class Html extends ContentPlugin
             'name' => 'contentEditor',
             'caption' => Eresus_Kernel::app()->getPage()->title,
             'width' => '100%',
-            'fields' => array(
-                array('type' => 'hidden', 'name' => 'action', 'value' => 'update'),
-                array('type' => 'html', 'name' => 'content', 'height' => '400px',
-                    'value' => $section->getContent()),
-                array('type' => 'text', 'value' => 'Адрес страницы: <a href="'
-                    . $section->getClientUrl() . '">' . $section->getClientUrl() . '</a>'),
-                array('type' => 'checkbox', 'name' => 'allowGET',
-                    'label' => 'Разрешить передавать аргументы методом GET',
-                    'value' => !$section->getOption('disallowGET', true)),
-                array('type' => 'checkbox', 'name' => 'allowPOST',
-                    'label' => 'Разрешить передавать аргументы методом POST',
-                    'value' => !$section->getOption('disallowPOST', true)),
-                array('type' => 'checkbox', 'name' => 'canonical',
-                    'label' => 'Добвлять к странице мета-тег «rel="canonical"»',
-                    'value' => $section->getOption('html.rel_canonical', true)),
-                ),
+            'fields' => array(array('type' => 'hidden', 'name' => 'action', 'value' => 'update')),
             'buttons' => array('apply', 'reset'),
         );
 
         /** @var TAdminUI $page */
         $page = Eresus_Kernel::app()->getPage();
+
+        if ($this->settings['notes'])
+        {
+            $form['fields'] []= array('type' => 'memo', 'name' => 'notes', 'height' => '5',
+                'value' => $section->getNotes(), 'style' => 'display: none',
+                'extra' => 'id="notes-input"', 'disabled' => true);
+
+            // TODO Переделать весь этот ужас при переходе на Eresus 3.01
+            $script = <<<END
+function _html_show_notes()
+{
+    document.getElementById('notes-button').remove();
+    var n=document.getElementById('notes-input');
+    n.style.display='block';
+    n.removeAttribute('disabled');
+}
+END;
+            $page->addScripts($script);
+
+            $notes = $section->getNotes();
+            if ($notes)
+            {
+                $form['fields'] []= array('type' => 'text', 'value' => InfoBox(nl2br($notes), ''));
+                $label = 'Изменить заметку';
+            }
+            else
+            {
+                $label = 'Добавить заметку';
+            }
+            $form['fields'] []= array('type' => 'text',
+                'value' => '<a href="javascript:_html_show_notes();" id="notes-button">' . $label . '</a>');
+        }
+        $form['fields'] []= array('type' => 'html', 'name' => 'content', 'height' => '400px',
+                    'value' => $section->getContent());
+        $form['fields'] []= array('type' => 'text', 'value' => 'Адрес страницы: <a href="'
+                . $section->getClientUrl() . '">' . $section->getClientUrl() . '</a>');
+        $form['fields'] []= array('type' => 'checkbox', 'name' => 'allowGET',
+                    'label' => 'Разрешить передавать аргументы методом GET',
+                    'value' => !$section->getOption('disallowGET', true));
+        $form['fields'] []= array('type' => 'checkbox', 'name' => 'allowPOST',
+                    'label' => 'Разрешить передавать аргументы методом POST',
+                    'value' => !$section->getOption('disallowPOST', true));
+        $form['fields'] []= array('type' => 'checkbox', 'name' => 'canonical',
+                    'label' => 'Добвлять к странице мета-тег «rel="canonical"»',
+                    'value' => $section->getOption('html.rel_canonical', true));
+
         $result = $page->renderForm($form, $item);
         return $result;
     }
@@ -163,6 +236,32 @@ class Html extends ContentPlugin
 
         $html = $page->content;
 
+        return $html;
+    }
+
+    /**
+     * Диалог настроек
+     *
+     * @return string
+     *
+     * @since x.xx
+     */
+    public function settings()
+    {
+        $form = array(
+            'name' => 'SettingsForm',
+            'caption' => $this->title . ' ' . $this->version,
+            'width' => '500px',
+            'fields' => array (
+                array('type' => 'hidden', 'name' => 'update', 'value' => $this->name),
+                array('type' => 'checkbox', 'name' => 'notes', 'label' => 'Включить заметки'),
+            ),
+            'buttons' => array('ok', 'apply', 'cancel'),
+        );
+
+        /** @var TAdminUI $page */
+        $page = Eresus_Kernel::app()->getPage();
+        $html = $page->renderForm($form, $this->settings);
         return $html;
     }
 
