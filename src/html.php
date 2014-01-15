@@ -71,6 +71,18 @@ class Html extends ContentPlugin
     public $description = 'Плагин обеспечивает визуальное редактирование текстографических страниц';
 
     /**
+     * Настройки
+     *
+     * @var array
+     *
+     * @since x.xx
+     */
+    public $settings = array(
+        // Заметки
+        'notes' => false
+    );
+
+    /**
      * Действия при установке модуля
      */
     public function install()
@@ -107,10 +119,13 @@ class Html extends ContentPlugin
         $section->setOption('disallowPOST', !arg('allowPOST', 'int'));
         $section->setOption('html.rel_canonical', arg('canonical', 'int'));
 
-        $notes = arg('notes');
-        if (!is_null($notes))
+        if ($this->settings['notes'])
         {
-            $section->setNotes($notes);
+            $notes = arg('notes');
+            if (!is_null($notes))
+            {
+                $section->setNotes($notes);
+            }
         }
 
         $sections->update($section->toArray());
@@ -138,36 +153,40 @@ class Html extends ContentPlugin
             'buttons' => array('apply', 'reset'),
         );
 
-        $form['fields'] []= array('type' => 'memo', 'name' => 'notes', 'height' => '5',
-            'value' => $section->getNotes(), 'label' => 'Заметки', 'style' => 'display: none',
-            'extra' => 'id="notes-input"', 'disabled' => true);
-
-        // TODO Переделать весь этот ужас при переходе на Eresus 3.01
         /** @var TAdminUI $page */
         $page = Eresus_Kernel::app()->getPage();
-        $script = <<<END
+
+        if ($this->settings['notes'])
+        {
+            $form['fields'] []= array('type' => 'memo', 'name' => 'notes', 'height' => '5',
+                'value' => $section->getNotes(), 'style' => 'display: none',
+                'extra' => 'id="notes-input"', 'disabled' => true);
+
+            // TODO Переделать весь этот ужас при переходе на Eresus 3.01
+            $script = <<<END
 function _html_show_notes()
 {
-    document.getElementById('add-note').remove();
+    document.getElementById('notes-button').remove();
     var n=document.getElementById('notes-input');
     n.style.display='block';
     n.removeAttribute('disabled');
 }
 END;
-        $page->addScripts($script);
+            $page->addScripts($script);
 
-        $notes = $section->getNotes();
-        if ($notes)
-        {
-            $form['fields'] []= array('type' => 'text', 'value' => InfoBox($notes, ''));
-            $label = 'Изменить заметки';
+            $notes = $section->getNotes();
+            if ($notes)
+            {
+                $form['fields'] []= array('type' => 'text', 'value' => InfoBox(nl2br($notes), ''));
+                $label = 'Изменить заметку';
+            }
+            else
+            {
+                $label = 'Добавить заметку';
+            }
+            $form['fields'] []= array('type' => 'text',
+                'value' => '<a href="javascript:_html_show_notes();" id="notes-button">' . $label . '</a>');
         }
-        else
-        {
-            $label = 'Добавить заметку';
-        }
-        $form['fields'] []= array('type' => 'text',
-            'value' => '<a href="javascript:_html_show_notes();" id="add-note">' . $label . '</a>');
         $form['fields'] []= array('type' => 'html', 'name' => 'content', 'height' => '400px',
                     'value' => $section->getContent());
         $form['fields'] []= array('type' => 'text', 'value' => 'Адрес страницы: <a href="'
@@ -217,6 +236,32 @@ END;
 
         $html = $page->content;
 
+        return $html;
+    }
+
+    /**
+     * Диалог настроек
+     *
+     * @return string
+     *
+     * @since x.xx
+     */
+    public function settings()
+    {
+        $form = array(
+            'name' => 'SettingsForm',
+            'caption' => $this->title . ' ' . $this->version,
+            'width' => '500px',
+            'fields' => array (
+                array('type' => 'hidden', 'name' => 'update', 'value' => $this->name),
+                array('type' => 'checkbox', 'name' => 'notes', 'label' => 'Включить заметки'),
+            ),
+            'buttons' => array('ok', 'apply', 'cancel'),
+        );
+
+        /** @var TAdminUI $page */
+        $page = Eresus_Kernel::app()->getPage();
+        $html = $page->renderForm($form, $this->settings);
         return $html;
     }
 
