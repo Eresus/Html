@@ -45,7 +45,7 @@ class Html extends ContentPlugin
      * @var string
      * @since 1.00
      */
-    public $version = 'x.xx';
+    public $version = '${product.version}';
 
     /**
      * Требуемая версия CMS
