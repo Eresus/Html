@@ -140,6 +140,55 @@ class Html_SiteSection
     }
 
     /**
+     * Возвращает заметки к странице
+     *
+     * @return string
+     *
+     * @since x.xx
+     */
+    public function getNotes()
+    {
+        $plugin = Eresus_Kernel::app()->getLegacyKernel()->plugins->load('html');
+        $table = ORM::getTable($plugin, 'Page');
+        /** @var Html_Entity_Page $page */
+        $page = $table->find($this->raw['id']);
+        if (is_null($page))
+        {
+            return '';
+        }
+        return $page->notes;
+    }
+
+    /**
+     * Задаёт заметки
+     *
+     * @param string $notes
+     *
+     * @since x.xx
+     */
+    public function setNotes($notes)
+    {
+        $plugin = Eresus_Kernel::app()->getLegacyKernel()->plugins->load('html');
+        $table = ORM::getTable($plugin, 'Page');
+        /** @var Html_Entity_Page $page */
+        $page = $table->find($this->raw['id']);
+        if (is_null($page))
+        {
+            $page = new Html_Entity_Page();
+            $page->id = $this->raw['id'];
+        }
+        $page->notes = $notes;
+        if ($page->getEntityState() == ORM_Entity::IS_NEW)
+        {
+            $table->persist($page);
+        }
+        else
+        {
+            $table->update($page);
+        }
+    }
+
+    /**
      * Возвращает свойства раздела в виде массива
      *
      * @return array
