@@ -75,7 +75,7 @@ class Html extends ContentPlugin
      *
      * @var array
      *
-     * @since x.xx
+     * @since 4.01
      */
     public $settings = array(
         // Заметки
@@ -244,7 +244,7 @@ END;
      *
      * @return string
      *
-     * @since x.xx
+     * @since 4.01
      */
     public function settings()
     {

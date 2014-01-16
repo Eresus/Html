@@ -29,7 +29,7 @@
 /**
  * Таблица страниц HTML
  *
- * @since x.xx
+ * @since 4.01
  */
 class Html_Entity_Table_Page extends ORM_Table
 {
