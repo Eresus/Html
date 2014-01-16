@@ -1,3 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <declaration uid="ru.eresus.plugins.html" format="1.00">
+    <requires>
+        <plugin name="orm" min="3.00a" max="3.01" />
+    </requires>
 </declaration>
