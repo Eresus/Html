@@ -32,7 +32,7 @@
  * @property int    $id
  * @property string $notes  примечания
  *
- * @since x.xx
+ * @since 4.01
  */
 class Html_Entity_Page extends ORM_Entity
 {

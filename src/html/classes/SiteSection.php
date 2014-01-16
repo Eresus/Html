@@ -144,7 +144,7 @@ class Html_SiteSection
      *
      * @return string
      *
-     * @since x.xx
+     * @since 4.01
      */
     public function getNotes()
     {
@@ -164,7 +164,7 @@ class Html_SiteSection
      *
      * @param string $notes
      *
-     * @since x.xx
+     * @since 4.01
      */
     public function setNotes($notes)
     {
